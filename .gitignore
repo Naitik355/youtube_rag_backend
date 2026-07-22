@@ -1,0 +1,21 @@
+# Environment variables
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+myenv/
+.env/
+
+# Chroma database
+my_db_chrome/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
