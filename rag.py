@@ -59,7 +59,7 @@ def load_video(video_id):
     return "Video Loaded successfully"
 
 def ask_video(video_id,question):
-    vectorstore=get_store(video_id)
+    vectorstore=store
     retriver=vectorstore.as_retriever(search_type="mmr", search_kwargs={'k':12,'fetch_k':50,'lambda_mult':0.3,'filter':{'video_id':{"$eq":video_id}}})
     def format(retrived_docs):
         context='\n\n'.join(doc.page_content for doc in retrived_docs)
