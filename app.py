@@ -1,57 +1,91 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from rag import ask_video,load_video
+from rag import ask_video, load_video
 import traceback
-import os
 
 app = Flask(__name__)
+
 CORS(app)
 
-@app.route("/load_video",methods=['POST'])
+
+@app.route("/")
+def home():
+    return {
+        "status": "running",
+        "service": "YouTube AI Tutor"
+    }
+
+
+@app.route("/load_video", methods=["POST"])
 def load():
-    data=request.json
-    video_id=data.get('video_id')
-    if not video_id:
-        return jsonify({"error":'video_id is missing'}),400
-    result=load_video(video_id)
-    return jsonify({"message":result})
+
+    try:
+        data = request.get_json()
+
+        video_id = data.get("video_id")
+
+        if not video_id:
+            return jsonify({
+                "error": "video_id is missing"
+            }),400
+
+        result = load_video(video_id)
+
+        return jsonify({
+            "message": result
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+
+        return jsonify({
+            "error": str(e)
+        }),500
+
 
 
 @app.route("/ask", methods=["POST"])
 def ask():
 
     try:
+
         data = request.get_json()
 
         print("Received:", data)
 
-        video_id = data["video_id"]
-        question = data["question"]
+        video_id = data.get("video_id")
+        question = data.get("question")
+
+
+        if not video_id or not question:
+            return jsonify({
+                "error":"video_id and question are required"
+            }),400
+
 
         answer = ask_video(
             video_id,
             question
         )
 
+
         return jsonify({
-            "answer": answer
+            "answer":answer
         })
 
 
     except Exception as e:
 
-        print("ERROR OCCURRED:")
         traceback.print_exc()
 
         return jsonify({
-            "error": str(e)
-        }), 500
+            "error":str(e)
+        }),500
 
 
-if __name__=="__main__":
-    port = int(os.environ.get("PORT", 5000))
 
+if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
-        port=port
+        port=5000
     )
