@@ -81,10 +81,14 @@ def ask_video(video_id,question):
 
     prompt=PromptTemplate(
         template="""    
-            You are a helpful assistant.
-            Answer only from the provided transcript context.
-            If the transcript context is not enough just say I don't know.
+            You are a helpful YouTube video assistant.
+            Your job is to answer user questions.
 
+            Rules:
+            1. If the user is greeting you or asking a general conversational question, answer normally.
+            2. If the question is related to the video, use only the provided transcript context.
+            3. If a video-related answer is not available in the transcript context, say "I don't know based on this video."
+            4. Do not make up information from outside the transcript.
             {context}
             Question:{question}
         """,
