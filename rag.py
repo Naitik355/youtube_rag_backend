@@ -10,9 +10,17 @@ from langchain_core.runnables import RunnableLambda,RunnablePassthrough,Runnable
 import os
 load_dotenv()
 
-llm=HuggingFaceEndpoint(repo_id='Qwen/Qwen2.5-7B-Instruct',huggingfacehub_api_token=os.getenv('HUGGINGFACE_ACCESS_TOKEN'))
-model=ChatHuggingFace(llm=llm)
-# model=ChatGoogleGenerativeAI(model="gemini-3-flash",api_key=os.getenv('GOOGLE_API_KEY'),temperature=0.2)
+# llm=HuggingFaceEndpoint(repo_id='mistralai/Mistral-7B-Instruct-v0.3',huggingfacehub_api_token=os.getenv('HUGGINGFACE_ACCESS_TOKEN'),provider="auto")
+
+model=ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite",api_key=os.getenv('GOOGLE_API_KEY'),temperature=0.2)
+# llm = HuggingFaceEndpoint(
+#     repo_id="Qwen/Qwen2.5-7B-Instruct",
+#     provider="featherless-ai",
+#     huggingfacehub_api_token=os.getenv("HUGGINGFACE_ACCESS_TOKEN"),
+#     task="conversational",
+#     temperature=0.2
+# )
+# model=ChatHuggingFace(llm=llm)
 embeddings=GoogleGenerativeAIEmbeddings(model='gemini-embedding-2-preview')
 parser=StrOutputParser()
 store=Chroma(
@@ -54,13 +62,14 @@ def get_store(video_id):
 
 def load_video(video_id):
     if video_exists(video_id):
-        return "Video already exists"
-    create_vectorstore(video_id)
+        return get_store(video_id)
+    else:
+        create_vectorstore(video_id)
     return "Video Loaded successfully"
 
 def ask_video(video_id,question):
-    vectorstore=store
-    retriver=vectorstore.as_retriever(search_type="mmr", search_kwargs={'k':12,'fetch_k':50,'lambda_mult':0.3,'filter':{'video_id':{"$eq":video_id}}})
+    vectorstore=get_store(video_id)
+    retriver=vectorstore.as_retriever(search_type="mmr", search_kwargs={'k':5,'fetch_k':20,'lambda_mult':0.3,'filter':{'video_id':{"$eq":video_id}}})
     def format(retrived_docs):
         context='\n\n'.join(doc.page_content for doc in retrived_docs)
         return context
